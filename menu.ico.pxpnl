@@ -1,0 +1,91 @@
+<Panel>
+  PanelName="menu.ico"
+
+<Header Id="0000">
+  Width=68
+  Height=47
+  Type="D"
+  InitialText==MSG("Menu")+"  - "+%HOSPITAL$
+  Default="1"
+  DisplayLogic="P"+QUO+";PRE_DISPLAY"+QUO
+  FocusLogic="P"+QUO+";POST_DISPLAY"+QUO
+  SelectLogic="P"+QUO+";ON_EXIT"+QUO
+  SaveInfo="2019/05/30 07:18 Administrator"
+  StatusSettings="S-MX"
+  NullText="RC"
+  DefaultProgram="util/menu.gui"
+  ValidationRules="Administrator"
+  ListboxType="0"
+</Header>
+
+<Control Id="0101">
+  Name="IMAGE_1"
+  Width=68
+  Height=4.6
+  Type="I"
+  InitialText="images/header.png"
+  Attributes="1"
+  NullText=" "
+</Control>
+
+<Control Id="0501">
+  Name="MENU"
+  Line=4.8
+  Width=68
+  Height=40
+  Type="L"
+  TabSetting=1000
+  SelectLogic="P"+QUO+";READ_MENU"+QUO
+  Index=$01$+","
+  StatusSettings="Aq|!l"
+  NullText="{},[]L60.00,"
+  Font=",2.5,"
+  ListboxType="L"
+  ScratchValue=$01$+"L{},[]L60.00,"+$01$+"e{!File_open|!File_open|!File_opening}"
+  ExtensionInfo="1"
+  Persistence="0"
+  TranslateTableTbl=1
+</Control>
+
+<Control Id="4601">
+  Name="IMAGE_2"
+  Line=45
+  Width=68
+  Height=1.8
+  Type="I"
+  InitialText="images/footer.png"
+  Attributes="1"
+  NullText=" "
+  OutputFormater="0"
+  ValidationRules="0"
+</Control>
+
+<Menu Id="M000">
+  InitialText="<Top Level>"
+  SelectLogic="G"
+  Index="0"
+</Menu>
+
+<Menu Id="M001">
+  InitialText="&Language"
+  InitialValue="I"
+  SelectLogic="G"
+  Index="0"
+</Menu>
+
+<Menu Id="M002">
+  InitialText="&English"
+  InitialValue="I"
+  SelectLogic="P"+QUO+"menu.gui;LANGUAGE"+QUO
+  Index="1"
+</Menu>
+
+<Menu Id="M003">
+  InitialText="&Spanish"
+  InitialValue="I"
+  SelectLogic="P"+QUO+"menu.gui;LANGUAGE"+QUO
+  Index="1"
+</Menu>
+
+</Panel>
+
