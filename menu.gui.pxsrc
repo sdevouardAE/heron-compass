@@ -8,7 +8,7 @@
 0080 ! 
 0100 ! ^100
 0110 INIT_INOMADS:
-0120 IF %inomads'url_arg_cnt<>0 THEN LET dataset$=%inomads'url_arg$("ds")
+0120 IF %inomads'url_arg_cnt<>0 THEN LET dataset$=STP(%inomads'url_arg$("ds"),ERR=*NEXT)
 0130 OPEN INPUT (HFN,ERR=*BREAK)"ds.conf"
 0140 WHILE (1=1)
 0150 LET ds$=RCD(LFO,END=*BREAK)
