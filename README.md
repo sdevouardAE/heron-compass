@@ -2,7 +2,7 @@
 
 ## Changes (2019-05-31)
 
-### menu.gui(.pxsrc)
+### util/menu.gui.pxsrc
 This is the source code for the **compass\util\menu.gui** program
 
 #### menu.gui;icons
@@ -11,7 +11,7 @@ This new entry point can be used to run Compass with the alternate menuing syste
 #### menu.gui;prompt
 _For developers_ This new entry point can be used to initialize the Compass runtime environment then break to console mode, allowing developers to run the PxPlus tools with all the Compass prefixes and system parameters set
 
-### menu.ico(.pxpnl)
+### pgmlib/mnu.en/menu.ico.pxpnl
 This is the source code for the new **menu.ico** Nomads screen. 
 
 It should be imported into the **compass\pgmlib\mnu.en** Nomads library
