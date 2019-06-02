@@ -2,15 +2,15 @@
   PanelName="menu.ico"
 
 <Header Id="0000">
-  Width=68
-  Height=47
+  Width=100
+  Height=42
   Type="D"
   InitialText==MSG("Menu")+"  - "+%HOSPITAL$
   Default="1"
   DisplayLogic="P"+QUO+";PRE_DISPLAY"+QUO
   FocusLogic="P"+QUO+";POST_DISPLAY"+QUO
   SelectLogic="P"+QUO+";ON_EXIT"+QUO
-  SaveInfo="2019/05/30 07:18 Administrator"
+  SaveInfo="2019/06/01 05:15 Administrator"
   StatusSettings="S-MX"
   NullText="RC"
   DefaultProgram="util/menu.gui"
@@ -20,43 +20,44 @@
 
 <Control Id="0101">
   Name="IMAGE_1"
-  Width=68
+  Width=100
   Height=4.6
   Type="I"
   InitialText="images/header.png"
-  Attributes="1"
+  Default="0"
+  Attributes="3"
   NullText=" "
+  ValidationRules="0"
 </Control>
 
 <Control Id="0501">
   Name="MENU"
   Line=4.8
-  Width=68
-  Height=40
+  Width=100
+  Height=35
   Type="L"
   TabSetting=1000
   SelectLogic="P"+QUO+";READ_MENU"+QUO
   Index=$01$+","
   StatusSettings="Aq|!l"
-  NullText="{},[]L60.00,"
+  NullText="{},[]L49.00,"
   Font=",2.5,"
   ListboxType="L"
-  ScratchValue=$01$+"L{},[]L60.00,"+$01$+"e{!File_open|!File_open|!File_opening}"
+  ScratchValue=$01$+"L{},[]L49.00,"+$01$+"e{!File_open|!File_open|!File_opening}"
   ExtensionInfo="1"
   Persistence="0"
   TranslateTableTbl=1
 </Control>
 
-<Control Id="4601">
+<Control Id="4101">
   Name="IMAGE_2"
-  Line=45
-  Width=68
+  Line=40
+  Width=100
   Height=1.8
   Type="I"
   InitialText="images/footer.png"
-  Attributes="1"
+  Attributes="3"
   NullText=" "
-  OutputFormater="0"
   ValidationRules="0"
 </Control>
 
