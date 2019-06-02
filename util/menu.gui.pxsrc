@@ -164,29 +164,49 @@
 24150 MSGBOX "Program temporarily offline",MSG("Information Message"),"INFO"
 24160 RELEASE 
 30000 REM 30000
-31000 REM ^1000 Load icons menu
-31010 LOAD_ICONS:
-31020 LIST_BOX LOAD menu.ctl,""
-31030 LET menu_def$=""
-31040 LET menu_cmd$=""
-31050 LET icon_folder$="!32x32/Folders/Folder"
-31060 LET icon_back$="!32x32/Arrows/Redo"
-31070 LET icon_form$="!32x32/Computer/Application_Form"
-31080 LET icon_exit$="!32x32/Buttons/Door_In"
-31090 SELECT id$,name$ FROM m_menu BEGIN menu_path$+"001" END menu_path$+"999"
-31100 LET menuk$=KEC(m_menu)
-31110 IF MID(menuk$,1,3)<>"000" THEN LET icon$=icon_form$ ELSE LET icon$=icon_folder$
-31120 LET menu_def$+=icon$+SEP+id$+"-"+name$+ESC
-31130 LET menu_cmd$+=MID(menu_path$,1+4*POS("000"=menu_path$))+MID(menuk$,-3)+SEP
-31140 NEXT RECORD 
-31150 IF MID(menuk$,1,7)="000|000" THEN LET menu_def$+=icon_exit$+SEP+"Exit"+ESC; LET menu_cmd$+="*exit*"+SEP ELSE LET menu_def$=icon_back$+SEP+"Up"+ESC+menu_def$; LET menu_cmd$="*up*"+SEP+menu_cmd$
-31160 LIST_BOX LOAD menu.ctl,menu_def$
-31170 LET menu.ctl'tblwidth=0
-31180 LET menu.ctl'tbl$=menu_cmd$
-31190 RETURN 
-31200 READ_MENU:
-31220 IF menu$="*exit*" THEN LET cmd_str$="END"; RETURN 
-31230 IF LEN(menu$)=3+1+3+1+3 THEN FIND (m_menu,KEY=menu$,DOM=*RETURN)id$; FIND (mnpgm,KEY=id$,DOM=*RETURN); PERFORM PGN+";START_NEW_TASK"; RETURN 
-31240 IF menu$="*up*" THEN LET menu_path$="000|"+MID(menu_path$,1,3)+"|" ELSE LET menu_path$=menu$+"|"
-31250 GOSUB LOAD_ICONS
-31260 RETURN 
+30100 REM ^100 Determine icon to use
+30110 GET_ICON:
+30120 ENTER menu_id$,use_icon$
+30130 ! 
+30140 IF menu_id$="*up*" THEN {! <- prior menu icon
+30150 LET use_icon$=PTH("menu/up.png",ERR=*NEXT)
+30160 IF TCB(2) THEN LET use_icon$="!32x32/Arrows/Redo"
+30170  } ELSE {! <-
+30180 IF menu_id$="*exit*" THEN {! <-- exit menu icon
+30190 LET use_icon$=PTH("menu/exit.png",ERR=*NEXT)
+30200 IF TCB(2) THEN LET use_icon$="!32x32/Buttons/Door_In"
+30210  } ELSE {! <--
+30220 LET use_icon$="",menu_img$=SUB(menu_id$," ","_")
+30230 LET use_icon$=PTH(MSG(="menu/%1.png",menu_img$),ERR=*NEXT)
+30240 IF TCB(2) AND LEN(menu_id$)=7 THEN {! <--- group or program icon
+30250 LET use_icon$=PTH(MSG(="menu/%1.png",MID(menu_img$,1,3+2)),ERR=*NEXT)
+30260 IF TCB(2) AND LEN(menu_id$)=5 THEN LET use_icon$=PTH(MSG(="menu/%1.png",MID(menu_img$,1,3)),ERR=*NEXT)
+30270  } ! --->
+30280 IF use_icon$="" THEN IF LEN(menu_id$)=7 THEN LET use_icon$="!32x32/Computer/Application_Form" ELSE LET use_icon$="!32x32/Folders/Folder"
+30290  } ! -->
+30300  } ! ->
+30310 ! 
+30320 EXIT 
+30400 REM ^100 Load icons menu
+30410 LOAD_ICONS:
+30420 LIST_BOX LOAD menu.ctl,""
+30430 LET menu_def$=""
+30440 LET menu_cmd$=""
+30450 SELECT id$,name$ FROM m_menu BEGIN menu_path$+"001" END menu_path$+"999"
+30460 LET menuk$=KEC(m_menu),icon$=""
+30470 CALL PGN+";GET_ICON",ERR=*NEXT,id$,icon$
+30480 LET menu_def$+=icon$+SEP+id$+"-"+name$+ESC
+30490 LET menu_cmd$+=MID(menu_path$,1+4*POS("000"=menu_path$))+MID(menuk$,-3)+SEP
+30500 NEXT RECORD 
+30510 IF MID(menu_path$,1,7)="000|000" THEN CALL PGN+";GET_ICON","*exit*",icon$; LET menu_def$+=icon$+SEP+"Exit"+ESC; LET menu_cmd$+="*exit*"+SEP ELSE CALL PGN+";GET_ICON","*up*",icon$; LET menu_def$=icon$+SEP+"Up"+ESC+menu_def$; LET menu_cmd$="*up*"+SEP+menu_cmd$
+30520 LIST_BOX LOAD menu.ctl,menu_def$
+30530 LET menu.ctl'tblwidth=0
+30540 LET menu.ctl'tbl$=menu_cmd$
+30550 RETURN 
+30600 REM ^100 Read menu selection
+30610 READ_MENU:
+30620 IF menu$="*exit*" THEN LET cmd_str$="END"; RETURN 
+30630 IF LEN(menu$)=3+1+3+1+3 THEN FIND (m_menu,KEY=menu$,DOM=*RETURN)id$; FIND (mnpgm,KEY=id$,DOM=*RETURN); PERFORM PGN+";START_NEW_TASK"; RETURN 
+30640 IF menu$="*up*" THEN LET menu_path$="000|"+MID(menu_path$,1,3)+"|" ELSE LET menu_path$=menu$+"|"
+30650 GOSUB LOAD_ICONS
+30660 RETURN 
