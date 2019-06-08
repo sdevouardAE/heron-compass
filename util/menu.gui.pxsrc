@@ -166,27 +166,33 @@
 30000 REM 30000
 30100 REM ^100 Determine icon to use
 30110 GET_ICON:
-30120 ENTER menu_id$,use_icon$
+30120 ENTER menu_id$,use_icon$,def_icon${ALL}
 30130 ! 
 30140 IF menu_id$="*up*" THEN {! <- prior menu icon
-30150 LET use_icon$=PTH("menu/up.png",ERR=*NEXT)
-30160 IF TCB(2) THEN LET use_icon$="!32x32/Arrows/Redo"
+30150 IF def_icon$["up"]<>"" THEN LET use_icon$=def_icon$["up"] ELSE LET use_icon$=PTH("menu/up.png",ERR=*PROCEED); IF TCB(2) THEN LET use_icon$="!32x32/Arrows/Redo"
+30160 LET def_icon$["up"]=use_icon$
 30170  } ELSE {! <-
 30180 IF menu_id$="*exit*" THEN {! <-- exit menu icon
-30190 LET use_icon$=PTH("menu/exit.png",ERR=*NEXT)
-30200 IF TCB(2) THEN LET use_icon$="!32x32/Buttons/Door_In"
+30190 IF def_icon$["exit"]<>"" THEN LET use_icon$=def_icon$["exit"] ELSE LET use_icon$=PTH("menu/exit.png",ERR=*PROCEED); IF TCB(2) THEN LET use_icon$="!32x32/Buttons/Door_In"
+30200 LET def_icon$["exit"]=use_icon$
 30210  } ELSE {! <--
-30220 LET use_icon$="",menu_img$=SUB(menu_id$," ","_")
+30220 LET use_icon$=""; LET menu_img$=SUB(menu_id$," ","_")
 30230 LET use_icon$=PTH(MSG(="menu/%1.png",menu_img$),ERR=*NEXT)
-30240 IF TCB(2) AND LEN(menu_id$)=7 THEN {! <--- group or program icon
-30250 LET use_icon$=PTH(MSG(="menu/%1.png",MID(menu_img$,1,3+2)),ERR=*NEXT)
-30260 IF TCB(2) AND LEN(menu_id$)=5 THEN LET use_icon$=PTH(MSG(="menu/%1.png",MID(menu_img$,1,3)),ERR=*NEXT)
-30270  } ! --->
-30280 IF use_icon$="" THEN IF LEN(menu_id$)=7 THEN LET use_icon$="!32x32/Computer/Application_Form" ELSE LET use_icon$="!32x32/Folders/Folder"
-30290  } ! -->
-30300  } ! ->
-30310 ! 
-30320 EXIT 
+30240 IF TCB(2) AND LEN(menu_img$)=(3+2+2) THEN LET menu_img$=MID(menu_img$,1,3+2); LET use_icon$=PTH(MSG(="menu/%1.png",menu_img$),ERR=*NEXT)
+30260 IF TCB(2) AND LEN(menu_img$)=(3+2) THEN LET menu_img$=MID(menu_img$,1,3); LET use_icon$=PTH(MSG(="menu/%1.png",menu_img$),ERR=*NEXT)
+30270 IF use_icon$="" THEN {! <---
+30271 IF LEN(menu_id$)=7 THEN {! <----
+30272 IF def_icon$["program"]<>"" THEN LET use_icon$=def_icon$["program"] ELSE LET use_icon$=PTH(MSG(="menu/program.png"),ERR=*PROCEED); IF TCB(2) THEN LET use_icon$="!32x32/Computer/Application_Form"
+30273 LET def_icon$["program"]=use_icon$
+30274  } ELSE {
+30275 IF def_icon$["group"]<>"" THEN LET use_icon$=def_icon$["group"] ELSE LET use_icon$=PTH(MSG(="menu/group.png"),ERR=*PROCEED); IF TCB(2) THEN LET use_icon$="!32x32/Folders/Folder"
+30276 LET def_icon$["group"]=use_icon$
+30277  } ! ---->
+30278  } ! --->
+30280  } ! -->
+30290  } ! ->
+30300 ! 
+30310 EXIT 
 30400 REM ^100 Load icons menu
 30410 LOAD_ICONS:
 30420 LIST_BOX LOAD menu.ctl,""
@@ -194,11 +200,11 @@
 30440 LET menu_cmd$=""
 30450 SELECT id$,name$ FROM m_menu BEGIN menu_path$+"001" END menu_path$+"999"
 30460 LET menuk$=KEC(m_menu),icon$=""
-30470 CALL PGN+";GET_ICON",ERR=*NEXT,id$,icon$
+30470 CALL PGN+";GET_ICON",ERR=*NEXT,id$,icon$,def_icon${ALL}
 30480 LET menu_def$+=icon$+SEP+id$+"-"+name$+ESC
 30490 LET menu_cmd$+=MID(menu_path$,1+4*POS("000"=menu_path$))+MID(menuk$,-3)+SEP
 30500 NEXT RECORD 
-30510 IF MID(menu_path$,1,7)="000|000" THEN CALL PGN+";GET_ICON","*exit*",icon$; LET menu_def$+=icon$+SEP+"Exit"+ESC; LET menu_cmd$+="*exit*"+SEP ELSE CALL PGN+";GET_ICON","*up*",icon$; LET menu_def$=icon$+SEP+"Up"+ESC+menu_def$; LET menu_cmd$="*up*"+SEP+menu_cmd$
+30510 IF MID(menu_path$,1,7)="000|000" THEN CALL PGN+";GET_ICON","*exit*",icon$,def_icon${ALL}; LET menu_def$+=icon$+SEP+"Exit"+ESC; LET menu_cmd$+="*exit*"+SEP ELSE CALL PGN+";GET_ICON","*up*",icon$,def_icon${ALL}; LET menu_def$=icon$+SEP+"Up"+ESC+menu_def$; LET menu_cmd$="*up*"+SEP+menu_cmd$
 30520 LIST_BOX LOAD menu.ctl,menu_def$
 30530 LET menu.ctl'tblwidth=0
 30540 LET menu.ctl'tbl$=menu_cmd$
