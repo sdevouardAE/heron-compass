@@ -1,4 +1,14 @@
 <Panel>
+  PanelName="            "
+
+<Header Id="0000">
+  SaveInfo="2"
+  Font="Arial,1"
+</Header>
+
+</Panel>
+
+<Panel>
   PanelName="menu.ico"
 
 <Header Id="0000">
@@ -10,12 +20,14 @@
   DisplayLogic="P"+QUO+";PRE_DISPLAY"+QUO
   FocusLogic="P"+QUO+";POST_DISPLAY"+QUO
   SelectLogic="P"+QUO+";ON_EXIT"+QUO
-  SaveInfo="2019/06/01 05:15 Administrator"
-  StatusSettings="S-MX"
+  SaveInfo="2019/06/03 12:12 Administrator"
+  StatusSettings="S-mMZX"
   NullText="RC"
   DefaultProgram="util/menu.gui"
   ValidationRules="Administrator"
   ListboxType="0"
+  SizingInfo="C"
+  AutosizeWidth="0"
 </Header>
 
 <Control Id="0101">
@@ -28,6 +40,7 @@
   Attributes="3"
   NullText=" "
   ValidationRules="0"
+  SizingInfo="FAT"
 </Control>
 
 <Control Id="0501">
@@ -44,6 +57,7 @@
   Font=",2.5,"
   ListboxType="L"
   ScratchValue=$01$+"L{},[]L49.00,"+$01$+"e{!File_open|!File_open|!File_opening}"
+  SizingInfo="ADF"
   ExtensionInfo="1"
   Persistence="0"
   TranslateTableTbl=1
@@ -59,6 +73,7 @@
   Attributes="3"
   NullText=" "
   ValidationRules="0"
+  SizingInfo="FAB"
 </Control>
 
 <Menu Id="M000">
