@@ -1,5 +1,15 @@
 # HERON Tech Compass
 
+## Changes (2019-06-08)
+
+### util/menu.gui.pxsrc
+
+#### menu.gui;get_icon
+Corrected the logic for image inheritance
+
+### pgmlib/mnu.en/menu.ico.pxpnl
+Added resize/auto cistom settings
+
 ## Changes (2019-06-02)
 
 ### util/menu.gui.pxsrc
