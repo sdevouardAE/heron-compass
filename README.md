@@ -8,7 +8,7 @@
 Corrected the logic for image inheritance
 
 ### pgmlib/mnu.en/menu.ico.pxpnl
-Added resize/auto cistom settings
+Added resize/auto custom settings
 
 ## Changes (2019-06-02)
 
