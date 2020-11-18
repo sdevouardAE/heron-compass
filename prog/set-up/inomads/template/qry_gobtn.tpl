@@ -1,0 +1,1 @@
+    <input type=submit onClick='submitform("GO"); return false;' name='__ctlLOAD' value='Go'>

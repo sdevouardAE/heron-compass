@@ -1,0 +1,1 @@
+<table class='iMsgBar'<?bb tbl(currentWindow'statusBar=1," style='display: none;'","") ?>><tr><td id='Msgbar'>&nbsp;</td><td id='Msgbar1'></td><td id='Msgbar2'></td><td id='Msgbar3'></td></tr></table>
