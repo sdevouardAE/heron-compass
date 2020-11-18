@@ -1,0 +1,131 @@
+! iNomads setup
+! 
+      begin 
+      print 'CS',
+      at=0
+      at=fn_output(at,'_black'+'white'+pad("Setup iNomads for Heron Compass",mxc(0)+ \
+            1,"C"),"")
+! 
+      template_dir$=pth("set-up/inomads/template",err=*next)
+      inomads_tpl$="*plus/inomads/templates/heron"
+      default_txid$="compass"
+! 
+      if template_dir$ \
+       then gosub COPY_TEMPLATE
+      gosub SETUP_TRANSACTIONS
+      gosub SETUP_CONFIG
+! 
+! ^9000
+      end 
+! 
+      def fn_output(local y, local label$, local value$)
+      print @(0,y),'RM',label$,tbl(value$<>"","",": "),value$
+      return ++y
+      end def
+! 
+COPY_TEMPLATE:
+! 
+      at=fn_output(at,"Copy template","")
+      call "*dirtree",template_dir$,filelist$,$09$,1
+      if pos($09$=filelist$,1,0)=0 \
+       then return 
+      old_dir$=template_dir$
+      at=fn_output(at,"From",'blue'+old_dir$)
+! 
+      directory inomads_tpl$,err=*next
+      new_dir$=pth(inomads_tpl$)
+      at=fn_output(at,"To..",'blue'+new_dir$)
+! 
+      file_cnt=0
+      dir_cnt=0
+! 
+      while filelist$<>""
+      o=pos($09$=filelist$)
+      in_file$=filelist$(1,o-1)
+      filelist$=filelist$(o+1)
+! 
+      ot_file$=sub(in_file$,old_dir$,new_dir$)
+! 
+      open input (hfn,isz=-1)in_file$
+      if mid(fib(lfo),19,1)="D" \
+       then close (lfo);
+            dir_cnt++;
+            directory ot_file$,err=*continue;
+            continue
+! 
+      in_fn=lfo
+! 
+      open create purge (hfn,isz=-1)ot_file$
+      ot_fn=lfo
+! 
+      while 1
+      read record (in_fn,siz=10240,end=*break)r$
+      write record (ot_fn)r$
+      wend 
+! 
+      close (in_fn),(ot_fn)
+      file_cnt++
+! 
+      wend 
+      success$="Success"
+      if dir_cnt<>0 \
+       then msge$='green'+"%1 files and %2 directories copied" \
+       else if file_cnt<>0 \
+             then msge$='green'+"%1 files copied" \
+             else msge$='red'+"Nothing to copy";
+                  success$="Failure"
+      at=fn_output(at,success$,msg(=msge$,str(file_cnt),str(dir_cnt)))
+! 
+      return 
+! 
+SETUP_TRANSACTIONS:
+! 
+      baseconf$="*plus/inomads/base.conf/tx.conf"
+      txconf$="*plus/inomads/tx.conf"
+      txconf=0
+      while (1=1)
+      open (hfn,iol=*,err=*next)txconf$;
+      txconf=lfo;
+      break
+      if nul(baseconf$) \
+       then break
+      call "*ufc",err=*next,pth(baseconf$),pth(txconf$),"Y",0
+      msge$=tbl(tcb(2),"File tx.conf copied from base directory","Could not copy tx.conf")
+      at=fn_output(at,msge$,"")
+      baseconf$=""
+      wend 
+! 
+      for (txconf<>0)
+      msge$="Created transaction"
+! // update legacy menu transaction
+      tx.txid$=default_txid$
+      tx.scr_id$="util/menu.gui"
+      tx.basedir$=lwd
+      tx.template$="heron"
+      tx.onexit$="http://www.herontech.com"
+      write (txconf,rec=tx$)
+      at=fn_output(at,msge$,'blue'+tx.txid$)
+! // update icon menu transaction
+      tx.txid$=msg(="%1_icon",default_txid$)
+      tx.scr_id$="util/menu.gui;icons"
+      write (txconf,rec=tx$)
+      at=fn_output(at,msge$,'blue'+tx.txid$)
+      close (txconf)
+      next 
+! 
+      return 
+! 
+SETUP_CONFIG:
+! 
+      open create purge (hfn)"*plus/inomads/inomads.conf"
+      inomadsconf=lfo
+! 
+      write record (inomadsconf)msg(="DEFAULT_TXID=%1",default_txid$)
+      at=fn_output(at,"Setup default transaction id",'blue'+default_txid$)
+      write record (inomadsconf)msg(="PXPLUS_EXEC=%1",arg(0))
+      at=fn_output(at,"Setup PxPlus executable path",'blue'+arg(0))
+      write record (inomadsconf)msg(="PXPLUS_LIB=%1",arg(-2))
+      at=fn_output(at,"Setup PxPlus library path",'blue'+arg(-2))
+! 
+      close (inomadsconf)
+      return 
