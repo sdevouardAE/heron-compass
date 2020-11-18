@@ -1,8 +1,16 @@
 # HERON Tech Compass
 
+## Changes (2020-11-18)
+
+### prog/set-up/inomads.gui.pxprg
+New program to install iNomads settings and template for Heron Compass
+
+### prog/set-up/inomads/template/*.*
+Files for the Heron Compass iNomads template
+
 ## Changes (2019-06-08)
 
-### util/menu.gui.pxsrc
+### prog/util/menu.gui.pxprg
 
 #### menu.gui;get_icon
 Corrected the logic for image inheritance
@@ -12,7 +20,7 @@ Added resize/auto custom settings
 
 ## Changes (2019-06-02)
 
-### util/menu.gui.pxsrc
+### prog/util/menu.gui.pxprg
 
 #### menu.gui;get_icon
 CALLable function to determine the icon to use in the menu
@@ -30,7 +38,7 @@ Changed the size of the screen to try and accomodate an iPad in landscape orient
 
 ## Changes (2019-05-31)
 
-### util/menu.gui.pxsrc
+### prog/util/menu.gui.pxprg
 
 #### menu.gui;icons
 This new entry point can be used to run Compass with the alternate menuing system using pages of icons
@@ -49,8 +57,14 @@ To run it from a browser, point to the URL : **http://*ServerAddress*/?txid=comp
 
 ## Repo structure
 
-### util/menu.gui.pxsrc
-This is the source code for the **compass\util\menu.gui** program
+### prog/set-up/inomads.gui.pxprg
+This is the source code for the **compass\prog\set-up\inomads.gui** program
+
+### prog/set-up/inomads/template
+This is the folder for all files in the Heron Compass iNomads template
+
+### prog/util/menu.gui.pxprg
+This is the source code for the **compass\prog\util\menu.gui** program
 
 ### pgmlib/mnu.en/menu.ico.pxpnl
 This is the Nomads panel definition for the **menu.ico** screen. 
