@@ -1,0 +1,340 @@
+0010 ! Menu.gui
+0020 ! 
+0030       if %inomads \
+            then gosub INIT_INOMADS
+0040       cwdir arg(1)
+0050       call "init.gui"
+0060       if action$="icons" \
+            then process "menu.ico","pgmlib/mnu.en" \
+            else if action$<>"prompt" \
+                  then process "menu.gui","pgmlib/mnu.en"
+0070       end 
+0080 ! 
+0100 ! ^100
+0110 INIT_INOMADS:
+0120       if %inomads'url_arg_cnt<>0 \
+            then dataset$=stp(%inomads'url_arg$("ds"),err=*next)
+0130       open input (hfn,err=*break)"ds.conf"
+0140       while (1=1)
+0150       ds$=rcd(lfo,end=*break)
+0160       if ds$="" or pos(mid(ds$,1,1)="!;#")<>0 \
+            then continue
+0170       if dataset$<>"" \
+            then if pos(lcs(dataset$)+"="=lcs(ds$))<>1 \
+                  then continue
+0180 ! // if no ds=xxxx passed on the URL, assume first dataset on file
+0190       path_list$=arg(ds$,2,"=")
+0200       read data from path_list$,sep="," to %apps_pth$,%data_pth$ ! // apps & data path
+0210       break
+0220       wend 
+0230       close (lfo)
+0240       if %apps_pth$="" \
+            then %apps_pth$=lwd;
+                 if pos(mid(%apps_pth$,-1)="/\")=0 \
+                  then %apps_pth$+="/"
+0250       if %apps_pth$<>"" \
+            then def arg(1)=%apps_pth$
+0260       if %data_pth$="" \
+            then %data_pth$=pth(lwd+"/data",err=*next)
+0270       if %data_pth$<>"" and pos(mid(%data_pth$,-1)="/\")=0 \
+            then %data_pth$+="/"
+0280       if %data_pth$<>"" \
+            then def arg(2)=%data_pth$
+0290       return 
+0300 ! ^300
+0310 PROMPT:
+0320 ICONS:
+0330       action$=lcs(arg(pgm(-3),2,";"))
+0340       run pgn
+1000 ! ^1000
+1010 PRE_DISPLAY:
+1020       print 'show'(-1), ! Hide the base window
+1030       call "open_iol","mnu/menus.dat",menus,f_main_file$
+1040       call "open_iol","mnu/mnsystem.dat",mnsystem,f_main_file$
+1050       call "open_iol","mnu/mnproces.dat",mnproces,f_main_file$
+1060       call "open_iol","mnu/mnpgm.dat",mnpgm,f_main_file$
+1070       exit 
+1080 ! 
+2000 ! ^1000
+2010 POST_DISPLAY:
+2020       if %multi_lingual \
+            then menu_var$="LE",_mnu_ctl=17002;
+                 gosub LANGUAGE_SWITCH \
+            else menu_bar clear 
+2030       gosub OPERATOR;
+           if cmd_str$="END" \
+            then return 
+2040       gosub LOAD_LBX1
+2050       if scrn_id$="menu.ico" \
+            then menu_path$="000|000|";
+                 gosub LOAD_ICONS
+2060       return 
+2070 ! 
+2100 ON_EXIT:
+2110       release 
+3000 ! ^1000 Add (Btn)
+3010 ADD:
+3020       return 
+4000 ! ^1000 Delete (Btn)
+4010 DEL:
+4020       return 
+5000 ! ^1000 Clear and Default (Btn)
+5010 CLEAR:
+5020 ! 
+6000 ! ^1000
+6010 LANGUAGE:
+6020       menu_bar read menu_var$
+6030 LANGUAGE_SWITCH:
+6040       switch menu_var$
+6050 ! 
+6060 LANGUAGE_TO_ENGLISH:
+6070       case "LE","II"
+6080       message_lib "langmsg/messages.en"
+6090       menu_para$="-["+msg("&Language")+"]"
+6100       menu_para$+=",L:["+msg("&English")+"=C,"+msg("&Spanish")+"]"
+6110       %language$="en"
+6120       break
+6130 ! 
+6140 LANGUAGE_TO_SPANISH:
+6150       case "LS","IE"
+6160       message_lib "langmsg/messages.sp"
+6170       menu_para$="-["+msg("&Language")+"]"
+6180       menu_para$+=",I:["+msg("&English")+","+msg("&Spanish")+"=C]"
+6190       %language$="sp"
+6200       break
+6210 ! 
+6220       end switch 
+6230       menu_bar _mnu_ctl,menu_para$
+6240       gosub LOAD_LBX1
+6250       if scrn_id$="menu.ico" \
+            then menu_path$="000|000|";
+                 gosub LOAD_ICONS
+6260       return 
+6270 ! 
+20000 ! 20000 Input Processing
+21000 ! ^1000 Operator Logon
+21010 OPERATOR:
+21020 ! LET %OPERATOR$="wp"
+21030       process "mnlogon.fmu","mnu.en"
+21040       if stp(%operator$,2)="" \
+             then cmd_str$="END";
+                  return 
+21050       return 
+21060 ! 
+22000 ! ^1000 List Systems and Programs
+22010 LOAD_LBX1:
+22020       if scrn_id$="menu.ico" \
+             then open (hfn)"*memory*";
+                  m_menu=lfo \
+             else list_box load lbx1.ctl,"";
+                  sv_tu=prm('TU');
+                  set_param 'TU'
+22030       main_seq=0 ! 
+22040       select *,rec=menus$ from menus,kno=2 begin %mngroup$ end %mngroup$+$FF$ ! read menu entries for this operator
+22050       read (mnsystem,key=menus.system$)
+22060       if scrn_id$="menu.ico" \
+             then main_seq$=str(++main_seq:"000");
+                  write (m_menu,key="000|000|"+main_seq$)mnsystem.system$,stp(msg(mnsystem.name$), \
+                        2) \
+             else list_box load lbx1.ctl,0,mnsystem.system$+" - "+stp(msg(mnsystem.name$), \
+                        2)
+22070       sub_seq=0 ! 
+22080       select *,rec=mnproces$ from mnproces begin mnsystem.system$+menus.process$ end mnsystem.system$+ \
+                  menus.process$+$FF$
+22090       if scrn_id$="menu.ico" \
+             then sub_seq$=str(++sub_seq:"000");
+                  write (m_menu,key="000|"+main_seq$+"|"+sub_seq$)mnsystem.system$+mnproces.process$, \
+                        stp(msg(mnproces.name$),2) \
+             else list_box load lbx1.ctl,0,mnsystem.system$+" - "+stp(msg(mnsystem.name$), \
+                        2)+sep+mnsystem.system$+mnproces.process$+" - "+stp(msg(mnproces.name$), \
+                        2)
+22100       pgm_seq=0 ! 
+22110       select *,rec=mnpgm$ from mnpgm begin mnsystem.system$+mnproces.process$ end mnsystem.system$+ \
+                  mnproces.process$+"99"
+22120       if menus.program$<>"" and menus.program$<>mnpgm.program$ \
+             then goto 22140
+22130       if scrn_id$="menu.ico" \
+             then pgm_seq$=str(++pgm_seq:"000");
+                  write (m_menu,key=main_seq$+"|"+sub_seq$+"|"+pgm_seq$)mnsystem.system$+mnproces.process$+ \
+                        mnpgm.program$,stp(msg(mnpgm.name$),2) \
+             else list_box load lbx1.ctl,0,mnsystem.system$+" - "+stp(msg(mnsystem.name$), \
+                        2)+sep+mnsystem.system$+mnproces.process$+" - "+stp(msg(mnproces.name$), \
+                        2)+sep+mnsystem.system$+mnproces.process$+mnpgm.program$+" - "+stp(msg(mnpgm.name$), \
+                        2)
+22140       next record 
+22150       next record 
+22160       next record 
+22170       print 'cursor'(0),
+22180       if scrn_id$<>"menu.ico" \
+             then set_param 'TU'=sv_tu;
+                  list_box show lbx1.ctl
+22190       return 
+22200 ! 
+22500 LBX1_READ: \
+            ! ^500
+22510       id=lbx1.ctl;
+            list_box read lbx1.ctl,lbx1$,_eom$,err=*return
+22520       x=pos(sep=lbx1$,1,2);
+            if x=0 \
+             then goto *return
+22530       read (mnpgm,key=lbx1$(x+1,7),dom=*return)
+22540       %patscan=0
+22550       goto START_NEW_TASK
+22560       if not(nul(mnpgm.library$)) \
+             then process mnpgm.pgmid$,mnpgm.library$,err=*return \
+             else \
+             {    
+22570 NOT_GUI:
+22580       _obj_w=80,_obj_h=25
+22590       perform "*winproc;CENTER_WDW";
+            _x$="",x=0
+22600       print 'dialogue'(_obj_c,_obj_l,_obj_w,_obj_h,"",'mode'($0C0F$)+'font'("MS Sans Serif", \
+                  1,"&"),opt="S-+"),'CS','SR',
+22610       run mnpgm.pgmid$,err=*return
+22620        }
+22630       return 
+22640 ! 
+23000 ! ^1000
+23010 START_NEW_TASK:
+23020       if sys="MS-WINDOWS" \
+             then goto 23050
+23030       process mnpgm.pgmid$,mnpgm.library$
+23040       exit 
+23050       if %inomads \
+             then i$=lwd+"/util/menu.gui;RUN_PGM_IN_NEW_TASK"+" -id="+fid(0)+" -FL -arg "+ \
+                        arg(1)+" "+arg(2)+" '"+mnpgm.pgmid$+"' '"+mnpgm.library$+"' '"+%operator$+ \
+                        "' '"+%mngroup$+"' '"+%language$+"'";
+                  call "*plus/spawn",i$;
+                  exit 
+23060       i$=quo+arg(0)+quo+" "+lwd+"/util/menu.gui;RUN_PGM_IN_NEW_TASK"+" -id="+fid(0)+ \
+                  " -FL -arg "+arg(1)+" "+arg(2)+" '"+mnpgm.pgmid$+"' '"+mnpgm.library$+"' '"+ \
+                  %operator$+"' '"+%mngroup$+"' '"+%language$+"'"
+23070       invoke hide i$
+23080       exit 
+23090 ! 
+24000 ! ^1000
+24010 RUN_PGM_IN_NEW_TASK:
+24012       if nul(arg(4)) \
+             then goto CALLPGM
+24020       tmp=unt;
+            open (tmp)arg(4)
+24030       read (tmp,key=pad(ucs(arg(3)),12)+"0000",dom=PGMOFFLINE)
+24040       close (tmp)
+24050       %operator$=arg(5),%mngroup$=arg(6),%language$=arg(7)
+24060       call "init.gui"
+24070       print 'show'(-1)
+24080       process arg(3),arg(4)
+24090       release 
+24091 ! 
+24092 CALLPGM:
+24100       %operator$=arg(5),%mngroup$=arg(6)
+24110       call "init.gui"
+24111       print 'show'(1)
+24112       call arg(3)
+24120       release 
+24130 ! 
+24140 PGMOFFLINE:
+24150       msgbox "Program temporarily offline",msg("Information Message"),"INFO"
+24160       release 
+30000 rem 30000
+30100 rem ^100 Determine icon to use
+30110 GET_ICON:
+30120       enter menu_id$,use_icon$,def_icon${all}
+30130 ! 
+30140       if menu_id$="*up*" \
+             then \
+             {    ! <- prior menu icon
+30150       if def_icon$["up"]<>"" \
+             then use_icon$=def_icon$["up"] \
+             else use_icon$=pth("menu/up.png",err=*proceed);
+                  if tcb(2) \
+                   then use_icon$="!32x32/Arrows/Redo"
+30160       def_icon$["up"]=use_icon$
+30170        } \
+             else \
+             {    ! <-
+30180       if menu_id$="*exit*" \
+             then \
+             {    ! <-- exit menu icon
+30190       if def_icon$["exit"]<>"" \
+             then use_icon$=def_icon$["exit"] \
+             else use_icon$=pth("menu/exit.png",err=*proceed);
+                  if tcb(2) \
+                   then use_icon$="!32x32/Buttons/Door_In"
+30200       def_icon$["exit"]=use_icon$
+30210        } \
+             else \
+             {    ! <--
+30220       use_icon$="";
+            menu_img$=sub(menu_id$," ","_")
+30230       use_icon$=pth(msg(="menu/%1.png",menu_img$),err=*next)
+30240       if tcb(2) and len(menu_img$)=(3+2+2) \
+             then menu_img$=mid(menu_img$,1,3+2);
+                  use_icon$=pth(msg(="menu/%1.png",menu_img$),err=*next)
+30260       if tcb(2) and len(menu_img$)=(3+2) \
+             then menu_img$=mid(menu_img$,1,3);
+                  use_icon$=pth(msg(="menu/%1.png",menu_img$),err=*next)
+30270       if use_icon$="" \
+             then \
+             {    ! <---
+30271       if len(menu_id$)=7 \
+             then \
+             {    ! <----
+30272       if def_icon$["program"]<>"" \
+             then use_icon$=def_icon$["program"] \
+             else use_icon$=pth(msg(="menu/program.png"),err=*proceed);
+                  if tcb(2) \
+                   then use_icon$="!32x32/Computer/Application_Form"
+30273       def_icon$["program"]=use_icon$
+30274        } \
+             else \
+             {    
+30275       if def_icon$["group"]<>"" \
+             then use_icon$=def_icon$["group"] \
+             else use_icon$=pth(msg(="menu/group.png"),err=*proceed);
+                  if tcb(2) \
+                   then use_icon$="!32x32/Folders/Folder"
+30276       def_icon$["group"]=use_icon$
+30277        } ! ---->
+30278        } ! --->
+30280        } ! -->
+30290        } ! ->
+30300 ! 
+30310       exit 
+30400 rem ^100 Load icons menu
+30410 LOAD_ICONS:
+30420       list_box load menu.ctl,""
+30430       menu_def$=""
+30440       menu_cmd$=""
+30450       select id$,name$ from m_menu begin menu_path$+"001" end menu_path$+"999"
+30460       menuk$=kec(m_menu),icon$=""
+30470       call pgn+";GET_ICON",err=*next,id$,icon$,def_icon${all}
+30480       menu_def$+=icon$+sep+id$+"-"+name$+esc
+30490       menu_cmd$+=mid(menu_path$,1+4*pos("000"=menu_path$))+mid(menuk$,-3)+sep
+30500       next record 
+30510       if mid(menu_path$,1,7)="000|000" \
+             then call pgn+";GET_ICON","*exit*",icon$,def_icon${all};
+                  menu_def$+=icon$+sep+"Exit"+esc;
+                  menu_cmd$+="*exit*"+sep \
+             else call pgn+";GET_ICON","*up*",icon$,def_icon${all};
+                  menu_def$=icon$+sep+"Up"+esc+menu_def$;
+                  menu_cmd$="*up*"+sep+menu_cmd$
+30520       list_box load menu.ctl,menu_def$
+30530       menu.ctl'tblwidth=0
+30540       menu.ctl'tbl$=menu_cmd$
+30550       return 
+30600 rem ^100 Read menu selection
+30610 READ_MENU:
+30620       if menu$="*exit*" \
+             then cmd_str$="END";
+                  return 
+30630       if len(menu$)=3+1+3+1+3 \
+             then find (m_menu,key=menu$,dom=*return)id$;
+                  find (mnpgm,key=id$,dom=*return);
+                  perform pgn+";START_NEW_TASK";
+                  return 
+30640       if menu$="*up*" \
+             then menu_path$="000|"+mid(menu_path$,1,3)+"|" \
+             else menu_path$=menu$+"|"
+30650       gosub LOAD_ICONS
+30660       return 
